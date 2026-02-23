@@ -13,23 +13,23 @@
   ],
   "icons": [
     {
-      "src": "img/logo.png",
+      "src": "https://ui-avatars.com/api/?name=RS&background=6366f1&color=fff&size=192&format=png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "img/logo.png",
+      "src": "https://ui-avatars.com/api/?name=RS&background=6366f1&color=fff&size=512&format=png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "img/logo.png",
-      "sizes": "512x512",
-      "type": "image/jpeg",
+      "src": "https://ui-avatars.com/api/?name=RE+Solution&background=6366f1&color=fff&size=1024",
+      "sizes": "1024x1024",
+      "type": "image/png",
       "form_factor": "narrow",
       "label": "Dashboard RE Solution"
     }
