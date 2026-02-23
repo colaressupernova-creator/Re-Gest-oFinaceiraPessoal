@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - RE Solution</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #a18cd1, #fbc2eb);
+            background-size: 400% 400%;
+            animation: move 15s ease infinite;
+        }
+
+        @keyframes move {
+
+            0%,
+            100% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 30px;
+            color: #1e293b;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary-gradient);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .toggle {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 0.8rem;
+            margin-top: -10px;
+            margin-bottom: 10px;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="card">
+        <h2 id="title">Entrar</h2>
+        <div id="errorMessage" class="error"></div>
+        <input type="text" id="username" placeholder="Usuário">
+        <input type="password" id="password" placeholder="Senha">
+        <div id="passwordRequirements"
+            style="display:none; text-align: left; font-size: 0.75rem; color: #64748b; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.03); border-radius: 8px;">
+            A senha deve conter:<br>
+            • Mínimo de 8 caracteres<br>
+            • Uma letra maiúscula<br>
+            • Um número<br>
+            • Um caractere especial (!@#$%^&*)
+        </div>
+        <button id="btnAction" onclick="handleSubmit()">Entrar</button>
+
+        <div style="margin: 20px 0; display: flex; align-items: center; gap: 10px; color: #64748b; font-size: 0.8rem;">
+            <div style="flex:1; height:1px; background: rgba(0,0,0,0.1);"></div>
+            OU
+            <div style="flex:1; height:1px; background: rgba(0,0,0,0.1);"></div>
+        </div>
+
+        <button id="btnGoogle" onclick="loginComGoogle()"
+            style="background: white; color: #1e293b; border: 1px solid rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" width="18">
+            Entrar com Google
+        </button>
+
+        <div class="toggle" id="toggleText" onclick="toggleMode()">Não tem uma conta? Cadastre-se</div>
+    </div>
+
+    <!-- Firebase SDK Modular -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBv6WXwVOU_gv1K_-x4MX1fYqaKoav5Hz8",
+            authDomain: "resolution-25a51.firebaseapp.com",
+            projectId: "resolution-25a51",
+            storageBucket: "resolution-25a51.firebasestorage.app",
+            messagingSenderId: "902491001825",
+            appId: "1:902491001825:web:3566f4dba8df45dcea78a0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
+
+        window.loginComGoogle = async () => {
+            try {
+                const result = await signInWithPopup(auth, provider);
+                const idToken = await result.user.getIdToken();
+
+                const res = await fetch('/api/auth/google', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id_token: idToken })
+                });
+
+                if (res.ok) {
+                    window.location.href = '/';
+                } else {
+                    const data = await res.json();
+                    alert("Erro no login: " + data.detail);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Erro ao autenticar com Google");
+            }
+        };
+    </script>
+
+    <script>
+        let isLogin = true;
+
+        function toggleMode() {
+            isLogin = !isLogin;
+            document.getElementById('title').innerText = isLogin ? 'Entrar' : 'Cadastrar';
+            document.getElementById('btnAction').innerText = isLogin ? 'Entrar' : 'Cadastrar';
+            const btnGoogle = document.getElementById('btnGoogle');
+            if (btnGoogle) btnGoogle.parentElement.style.display = isLogin ? 'block' : 'none';
+            document.getElementById('toggleText').innerText = isLogin ? 'Não tem uma conta? Cadastre-se' : 'Já tem uma conta? Entre';
+            document.getElementById('passwordRequirements').style.display = isLogin ? 'none' : 'block';
+        }
+
+        async function handleSubmit() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorEl = document.getElementById('errorMessage');
+
+            if (!username || !password) {
+                errorEl.innerText = "Preencha todos os campos";
+                errorEl.style.display = "block";
+                return;
+            }
+
+            const url = isLogin ? '/api/login' : '/api/register';
+            try {
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                if (res.ok) {
+                    if (isLogin) {
+                        window.location.href = '/';
+                    } else {
+                        alert("Cadastrado com sucesso! Agora entre.");
+                        toggleMode();
+                    }
+                } else {
+                    const data = await res.json();
+                    errorEl.innerText = data.detail || "Erro ao processar";
+                    errorEl.style.display = "block";
+                }
+            } catch (e) {
+                errorEl.innerText = "Erro de conexão";
+                errorEl.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>

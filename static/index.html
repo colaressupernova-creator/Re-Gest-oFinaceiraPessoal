@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>RE Solution - Gestão Financeira Pro</title>
+
+  <meta name="theme-color" content="#6366f1">
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="img/logo.png">
+  <link rel="icon" type="image/png" href="img/logo.png">
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet"
+    crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+
+<body>
+
+  <div id="bannerAlerta">🔔 ATENÇÃO: Contas vencidas ou vencendo hoje!</div>
+
+  <div class="sidebar">
+    <div class="logo">
+      <img src="img/logo.png" alt="Logo" class="logo-img"
+        onerror="this.src='https://ui-avatars.com/api/?name=RS&background=6366f1&color=fff'">
+      <span>RE Solution</span>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mês / Ano</div>
+      <div style="display: flex; gap: 5px;">
+        <select id="mes" onchange="mudarMes()" style="flex: 2;">
+          <!-- JS -->
+        </select>
+        <select id="ano" onchange="mudarMes()" style="flex: 1.5;">
+          <!-- JS -->
+        </select>
+      </div>
+    </div>
+
+    <div class="sidebar-section desktop-only" id="containerGraficoSide">
+      <div class="sidebar-label">Resumo Visual</div>
+      <div style="height: 180px; position: relative;">
+        <canvas id="graficoSidebar"></canvas>
+      </div>
+    </div>
+
+    <div class="sidebar-section" style="margin-top:auto;">
+      <div class="sidebar-label">Sistema</div>
+
+      <button class="btn-outline" onclick="gerarRelatorioDiario()">
+        <i class="fas fa-chart-line"></i> <span>Relatório</span>
+      </button>
+      <button class="btn-outline" onclick="exportarDados()">
+        <i class="fas fa-file-export"></i> <span>Backup</span>
+      </button>
+      <button class="btn-outline" onclick="toggleDarkMode()">
+        <i class="fas fa-adjust"></i> <span>Tema</span>
+      </button>
+      <button class="btn-outline" onclick="document.getElementById('inputImport').click()">
+        <i class="fas fa-file-import"></i> <span>Restaurar</span>
+      </button>
+      <button class="btn-outline" onclick="if(window.fazerLogout) window.fazerLogout()"
+        style="color:var(--danger); border-color:var(--danger);">
+        <i class="fas fa-sign-out-alt"></i> <span>Sair</span>
+      </button>
+      <input type="file" id="inputImport" style="display:none" onchange="importarDados(event)">
+    </div>
+  </div>
+
+  <main class="main-content" id="top">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div>
+        <h2 style="margin:0; font-size: 1.5rem;">Visão Geral</h2>
+        <span id="labelMesAtivo" style="color: var(--text-light); font-weight: 500;">Carregando...</span>
+      </div>
+
+      <div class="perfil-wrapper" style="position: relative; display: flex; align-items: center; gap: 12px;">
+        <div style="text-align: right;" class="desktop-only" onclick="toggleProfileMenu()">
+          <div id="userNameTop" style="font-weight: 600; font-size: 0.9rem; cursor: pointer;">Carregando...</div>
+          <div style="font-size: 0.7rem; color: var(--text-light); cursor: pointer;">Perfil Premium</div>
+        </div>
+        <div class="perfil-avatar" onclick="toggleProfileMenu()">
+          <img id="imgPerfil" src="https://ui-avatars.com/api/?name=User&background=6366f1&color=fff" alt="Perfil">
+        </div>
+
+        <div id="profileDropdown" class="profile-dropdown">
+          <div class="dropdown-header">
+            <div id="userNameDropdown" style="font-weight: 700;">Usuário</div>
+            <div style="font-size: 0.7rem; opacity: 0.8;">re-solution@premium.com</div>
+          </div>
+          <div class="dropdown-body">
+            <button onclick="document.getElementById('inputFotoPerfil').click()"><i class="fas fa-camera"></i> Alterar
+              Foto</button>
+            <button onclick="abrirModalSenha()"><i class="fas fa-key"></i> Alterar Senha</button>
+            <button onclick="abrirConfigMobile()"><i class="fas fa-cog"></i> Configurações</button>
+            <hr style="border: none; border-top: 1px solid rgba(0,0,0,0.05); margin: 8px 0;">
+            <button onclick="fazerLogout()" style="color: var(--danger);"><i class="fas fa-sign-out-alt"></i>
+              Sair</button>
+          </div>
+        </div>
+
+        <input type="file" id="inputFotoPerfil" accept="image/*" style="display:none"
+          onchange="carregarFotoPerfil(event)">
+      </div>
+    </div>
+
+    <div class="tip-card">
+      <i class="fas fa-lightbulb tip-icon"></i>
+      <div class="tip-text-container">
+        <div id="tipText" class="tip-text">Carregando dica...</div>
+      </div>
+    </div>
+
+    <div class="grid-4">
+      <div class="card dash-card card-success" onclick="abrirRelatorioCard('receber')">
+        <span class="click-hint"><i class="fas fa-search"></i> Resumo</span>
+        <i class="fas fa-arrow-down dash-bg-icon"></i>
+        <label>Recebido</label>
+        <div class="dash-value" id="totalRecebido">R$ 0,00</div>
+        <span id="aiReceber"
+          style="font-size: 0.65rem; display: block; margin-top: 5px; opacity: 0.9; font-weight: 500;"></span>
+      </div>
+
+      <div class="card dash-card card-danger" onclick="abrirRelatorioCard('pagar')">
+        <span class="click-hint"><i class="fas fa-search"></i> Resumo</span>
+        <i class="fas fa-arrow-up dash-bg-icon"></i>
+        <label>Pago</label>
+        <div class="dash-value" id="totalPago">R$ 0,00</div>
+        <span id="aiPagar"
+          style="font-size: 0.65rem; display: block; margin-top: 5px; opacity: 0.9; font-weight: 500;"></span>
+      </div>
+
+      <div class="card dash-card card-reserva" onclick="abrirRelatorioCard('reserva')">
+        <span class="click-hint"><i class="fas fa-search"></i> Detalhes</span>
+        <i class="fas fa-piggy-bank dash-bg-icon"></i>
+        <label>Reserva (Total)</label>
+        <div class="dash-value" id="totalReserva">R$ 0,00</div>
+        <span id="aiReserva"
+          style="font-size: 0.65rem; display: block; margin-top: 5px; opacity: 0.9; font-weight: 500;"></span>
+      </div>
+
+      <div class="card dash-card card-primary" onclick="abrirRelatorioCard('saldo')">
+        <span class="click-hint"><i class="fas fa-search"></i> Resumo</span>
+        <i class="fas fa-wallet dash-bg-icon"></i>
+        <label>Saldo Disponível</label>
+        <div class="dash-value" id="saldo">R$ 0,00</div>
+        <span id="aiSaldo"
+          style="font-size: 0.65rem; display: block; margin-top: 5px; opacity: 0.9; font-weight: 500;"></span>
+      </div>
+    </div>
+
+    <div class="card mobile-only" style="margin-top: 20px;">
+      <h3
+        style="margin-top:0; margin-bottom: 15px; font-size: 1rem; color: var(--text-light); text-transform: uppercase;">
+        📊 Resumo de Gastos</h3>
+      <div style="height: 250px; position: relative;">
+        <canvas id="graficoMobile"></canvas>
+      </div>
+    </div>
+
+    <div id="areaFormulario" class="card" style="margin-top: 20px;">
+      <div class="form-content">
+        <button class="btn-close-form mobile-only" onclick="fecharFormularioMobile()" style="display:block">✕</button>
+        <h3 style="margin-top:0; margin-bottom: 15px;">📝 Novo Lançamento</h3>
+        <div class="grid-2">
+          <div>
+            <label>Tipo</label>
+            <select id="tipo">
+              <option value="pagar">🔴 Pagar (Saída)</option>
+              <option value="receber">🟢 Receber (Entrada)</option>
+            </select>
+          </div>
+          <div>
+            <label>Categoria</label>
+            <select id="categoria">
+              <option value="Supermercado">🛒 Supermercado</option>
+              <option value="Alimentação">🍔 Alimentação</option>
+              <option value="Transporte">🚗 Transporte</option>
+              <option value="Lazer">🎉 Lazer</option>
+              <option value="Gastos Pessoais">💆♂️ Gastos Pessoais</option>
+              <option value="Saúde">🩺 Saúde e bem-estar</option>
+              <option value="Credito">💲 Credito</option>
+              <option value="Filho">🧒 Filho</option>
+              <option value="Moradia">🏠 Moradia</option>
+              <option value="Assinaturas">📺 Assinaturas</option>
+              <option value="Emprestimos">💸 Emprestimos</option>
+              <option value="Vale Alimentação">💳 Vale Alimentação</option>
+              <option value="Mensalidades">💪 Mensalidades</option>
+              <option value="Reserva">🧾 Reserva (Envia p/ Card)</option>
+              <option value="Resgate Reserva">💰 Resgate Reserva</option>
+              <option value="Salário">💰 Salário</option>
+              <option value="Outros">⚙️ Outros</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div><label>Descrição</label><input id="descricao" placeholder="Ex: Mercado Semanal"></div>
+          <div><label>Valor (R$)</label><input id="valor" type="number" step="0.01"></div>
+        </div>
+        <div class="grid-2">
+          <div><label>Data</label><input id="data" type="date"></div>
+          <div><label>Repetições (Meses)</label><input id="repeticoes" type="number" value="1" min="1" max="60"></div>
+        </div>
+        <button id="btnSalvar" class="btn-primary" onclick="adicionar()">
+          <i class="fas fa-plus-circle"></i> Adicionar Lançamento
+        </button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <h3 class="text-success" style="margin-top:0" id="tituloReceber"><i class="fas fa-arrow-down"></i> Entradas</h3>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoria/Desc.</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>OK</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabelaReceber"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="text-danger" style="margin-top:0" id="tituloPagar"><i class="fas fa-arrow-up"></i> Saídas</h3>
+        <div class="table-box">
+          <table>
+            <thead>
+              <tr>
+                <th>Categoria/Desc.</th>
+                <th>Valor</th>
+                <th>Data</th>
+                <th>OK</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="tabelaPagar"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div style="height: 50px;"></div>
+  </main>
+
+  <nav class="bottom-nav" id="navMobile">
+    <button class="nav-btn" onclick="scrollToId('top')">
+      <i class="fas fa-home"></i> <span>Início</span>
+    </button>
+    <button class="nav-btn" onclick="gerarRelatorioDiario()">
+      <i class="fas fa-chart-pie"></i> <span>Relatório</span>
+    </button>
+
+    <button class="nav-btn-main" onclick="abrirFormularioMobile()">
+      <i class="fas fa-plus"></i>
+    </button>
+
+    <button class="nav-btn" onclick="abrirConfigMobile()">
+      <i class="fas fa-calendar-alt"></i> <span>Mês</span>
+    </button>
+    <button class="nav-btn" onclick="toggleDarkMode()">
+      <i class="fas fa-adjust"></i> <span>Tema</span>
+    </button>
+  </nav>
+
+  <div id="modalConfig" class="modal-overlay" onclick="fecharModalGeral(event, 'modalConfig')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin:0">Selecionar Período</h3>
+        <button onclick="document.getElementById('modalConfig').style.display='none'"
+          style="background:none; border:none; color:white; font-size:1.2rem;">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Selecionar Período</label>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+          <select id="mesMobile" onchange="mudarMesMobile()" style="flex: 2;">
+            <!-- JS -->
+          </select>
+          <select id="anoMobile" onchange="mudarMesMobile()" style="flex: 1.5;">
+            <!-- JS -->
+          </select>
+        </div>
+
+        <label>Dados</label>
+        <button class="btn-outline" style="color:var(--text-dark); border-color:var(--text-light);"
+          onclick="exportarDados()">Baixar Backup</button>
+        <button class="btn-outline" style="color:var(--text-dark); border-color:var(--text-light);"
+          onclick="document.getElementById('inputImport').click()">Restaurar Backup</button>
+        <button class="btn-outline" style="color:var(--danger); border-color:var(--danger); margin-top: 15px;"
+          onclick="fazerLogout()">
+          <i class="fas fa-sign-out-alt"></i> Sair da Conta
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modalRelatorio" class="modal-overlay" onclick="fecharModalGeral(event, 'modalRelatorio')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin:0" id="modalRelatorioTitulo">📊 Relatório</h3>
+        <button onclick="document.getElementById('modalRelatorio').style.display='none'"
+          style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div id="corpoRelatorio" class="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="modalSenha" class="modal-overlay" onclick="fecharModalGeral(event, 'modalSenha')">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 style="margin:0">Atualizar Senha</h3>
+        <button onclick="document.getElementById('modalSenha').style.display='none'"
+          style="background:none; border:none; color:white; font-size:1.2rem; cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body">
+        <label>Nova Senha</label>
+        <input type="password" id="novaSenha" placeholder="Mín. 8 dígitos, Letra Maiusc, Num e Esp..."
+          style="margin-bottom: 15px;">
+        <div style="font-size: 0.7rem; color: var(--text-light); margin-bottom: 20px;">
+          Dica: Use símbolos como @#$% para maior segurança.
+        </div>
+        <button class="btn-primary" onclick="salvarNovaSenha()">Atualizar Senha Agora</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/script.js?v=4"></script>
+</body>
+
+</html>
