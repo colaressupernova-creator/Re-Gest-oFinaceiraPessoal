@@ -1,0 +1,14 @@
+[
+    {
+        "relation": [
+            "delegate_permission/common.handle_all_urls"
+        ],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.onrender.re_gest_ofinaceirapessoal.twa",
+            "sha256_cert_fingerprints": [
+                "5D:43:C2:73:26:DE:17:AF:1F:74:31:46:CA:7F:B0:DA:EE:3C:D7:1D:72:04:C6:17:09:18:FD:98:D6:80:66:54"
+            ]
+        }
+    }
+]
