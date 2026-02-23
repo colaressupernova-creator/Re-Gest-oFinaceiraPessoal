@@ -339,6 +339,19 @@
   </div>
 
   <script src="js/script.js?v=4"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(registration => {
+            console.log('SW Registrado: ', registration);
+          })
+          .catch(registrationError => {
+            console.log('Erro no SW: ', registrationError);
+          });
+      });
+    }
+  </script>
 </body>
 
 </html>
