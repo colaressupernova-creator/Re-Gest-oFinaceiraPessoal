@@ -1025,3 +1025,36 @@ body.dark-mode .btn-close-form {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
 }
+
+/* --- ESPAÇO PARA ANÚNCIOS (ADMOB/ADSENSE) --- */
+.ad-container {
+  width: 100%;
+  max-width: 728px;
+  margin: 20px auto;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(168, 85, 247, 0.3);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 90px;
+  position: relative;
+  overflow: hidden;
+  color: var(--text-light);
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ad-container::before {
+  content: "ESPAÇO PUBLICITÁRIO (ADMOB)";
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .ad-container {
+    min-height: 50px;
+    margin: 10px auto;
+    font-size: 0.6rem;
+  }
+}
