@@ -811,6 +811,41 @@ function gerarRelatorioDiario() {
     else if (diferencaOk > 0) msgMotivacional = "😅 <strong>Positivo, mas cuidado!</strong>";
     else msgMotivacional = "⚠️ <strong>Alerta de Caixa!</strong>";
 
+    const contasPendentesPorDia = {};
+    dadosPorMes[mesAtual].pagar.forEach(item => {
+        if (!item.marcado && item.data) {
+            const dataFormatada = item.data.split('-').reverse().slice(0, 2).join('/');
+            contasPendentesPorDia[dataFormatada] = (contasPendentesPorDia[dataFormatada] || 0) + item.valor;
+        }
+    });
+
+    let htmlContasPendentes = '';
+    const datasOrdenadas = Object.keys(contasPendentesPorDia).sort((a, b) => {
+        const [diaA, mesA] = a.split('/').map(Number);
+        const [diaB, mesB] = b.split('/').map(Number);
+        if (mesA !== mesB) return mesA - mesB;
+        return diaA - diaB;
+    });
+
+    if (datasOrdenadas.length > 0) {
+        htmlContasPendentes = `
+            <div style="background: rgba(255, 193, 7, 0.05); border-left: 5px solid #ffc107; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(255, 193, 7, 0.15);">
+                <h4 style="margin: 0 0 10px 0; font-size: 0.8rem; color: var(--text-light); text-transform: uppercase;"><i class="fas fa-clock"></i> Contas Pendentes por Dia</h4>
+                <div style="font-size: 0.9rem;">
+        `;
+        datasOrdenadas.forEach(data => {
+            htmlContasPendentes += `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px; border-bottom: 1px dashed rgba(0,0,0,0.05); padding-bottom: 2px;">
+                    <span>${data}:</span><span style="font-weight: bold; color: var(--danger);">${formatar(contasPendentesPorDia[data])}</span>
+                </div>
+            `;
+        });
+        htmlContasPendentes += `
+                </div>
+            </div>
+        `;
+    }
+
     const corpo = document.getElementById('corpoRelatorio');
     const tit = document.getElementById('modalRelatorioTitulo');
     if (!corpo || !tit) return;
@@ -830,6 +865,9 @@ function gerarRelatorioDiario() {
                 <span>Saldo Final Previsto:</span><span style="color: ${corBalanco}">${formatar(saldoGeral)}</span>
             </div>
         </div>
+        
+        ${htmlContasPendentes}
+
         <div style="background: rgba(0,0,0,0.02); border-left: 5px solid ${corRealizado}; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05);">
             <h4 style="margin: 0 0 5px 0; font-size: 0.8rem; color: var(--text-light); text-transform: uppercase;">💡 Realizado até agora (Pago/Recebido)</h4>
             <p style="margin: 0; font-size: 0.95rem; color: var(--text-dark);">
